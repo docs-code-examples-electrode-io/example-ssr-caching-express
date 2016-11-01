@@ -1,4 +1,5 @@
 import Express from 'express';
+import SSRCaching from "electrode-react-ssr-caching";
 import React from 'react';
 import ReactDOM from 'react-dom/server';
 import config from './config';
@@ -27,6 +28,23 @@ const proxy = httpProxy.createProxyServer({
   target: targetUrl,
   ws: true
 });
+
+let store;
+
+function createReduxStore(req, match) {
+  // this refs to engine
+
+  let initialState = {count : 100};
+  let rootReducer = (s, a) => s
+  store = createStore(rootReducer, initialState);
+
+  return Promise.all([
+    // DO ASYNC THUNK ACTIONS HERE : store.dispatch(boostrapApp())
+    Promise.resolve({})
+  ]).then(() => {
+    return store;
+  });
+}
 
 app.use(compression());
 app.use(favicon(path.join(__dirname, '..', 'static', 'favicon.ico')));
@@ -120,3 +138,19 @@ if (config.port) {
 } else {
   console.error('==>     ERROR: No PORT environment variable has been specified');
 }
+
+const cacheConfig = {
+  components: {
+    SSRCachingTemplateType: {
+      strategy: "template",
+      enable: true
+    },
+    SSRCachingSimpleType: {
+      strategy: "simple",
+      enable: true
+    }
+  }
+};
+
+SSRCaching.enableCaching();
+SSRCaching.setCachingConfig(cacheConfig);

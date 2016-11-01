@@ -38,7 +38,7 @@ npm run dev
 npm install --save electrode-react-ssr-caching
 ```
 
-* Import SSRCaching in `hapiApp/src/server.js`
+* Import SSRCaching in `expressApp/src/server.js`
 
 ```js
 import SSRCaching from "electrode-react-ssr-caching";
@@ -51,7 +51,7 @@ import SSRCaching from "electrode-react-ssr-caching";
 you are using all `require` or all `import`. Found that SSR caching was NOT working if, `electrode-react-ssr-caching`
 is `require`d first and then `react` and `react-dom` is imported.
 
-* Enable caching by adding the configuration code in `hapiApp/src/server.js`
+* Enable caching by adding the configuration code in `expressApp/src/server.js`
 
 ```js
 const cacheConfig = {
@@ -76,7 +76,7 @@ SSRCaching.setCachingConfig(cacheConfig);
 
 * For simple strategy, add the following:
 
-`hapiApp/src/components/SSRCachingSimpleType.js`
+`expressApp/src/components/SSRCachingSimpleType.js`
 
 ```js
 import React from "react";
@@ -121,7 +121,7 @@ export default connect(
 
 * For Template strategy, add the following:
 
-`hapiApp/src/components/SSRCachingTemplateType.js`
+`expressApp/src/components/SSRCachingTemplateType.js`
 
 ```js
 import React from "react";
@@ -163,7 +163,8 @@ export default connect(
 )(SSRCachingTemplateTypeWrapper);
 ```
 
-* Add the routes to our new components. Replace the contents of `hapiApp/src/routes.js` with the following:
+* Add the routes to our new components.
+* Replace the contents of `expressApp/src/routes.js` with the following:
 
 ```js
 import React from 'react';
@@ -183,7 +184,8 @@ module.exports = (
 );
 ```
 
-* Wire up the home page with our new routes. Replace the contents of `hapiApp/src/components/Home.js` with the following:
+* Wire up the home page with our new routes.
+* Add the following `expressApp/src/components/Home.js`:
 
 ```js
 import React from "react";
@@ -220,7 +222,27 @@ export default class Home extends React.Component {
 
 ### Redux Configuration
 
-* From `hapiApp/src/server.js` replace the line:
+
+* From `expressApp/src/redux/create.js` replace the contents with the following:
+
+```js
+function createReduxStore(req, match) {
+  // this refs to engine
+
+  let initialState = {count : 100};
+  let rootReducer = (s, a) => s;
+  store = createStore(rootReducer, initialState);
+
+  return Promise.all([
+      // DO ASYNC THUNK ACTIONS HERE : store.dispatch(boostrapApp())
+      Promise.resolve({})
+    ]).then(() => {
+      return store;
+  });
+}
+```
+
+* From `expressApp/src/server.js` replace the line:
 
 ```
 const store = configureStore();
@@ -232,18 +254,23 @@ with:
 const store = configureStore({count: 100});
 ```
 
-* Replace the contents of `hapiApp/src/reducers/index.js` with the following:
+* Replace the contents of `express/src/reducers/index.js` with the following:
 
 ```js
-import { combineReducers } from 'redux';
-import { routerReducer } from 'react-router-redux'
+function createReduxStore(req, match) {
+  // this refs to engine
 
-const rootReducer = combineReducers({
-  routing: routerReducer,
-  count: (s=100, a) => s
-});
+  let initialState = {count : 100};
+  let rootReducer = (s, a) => s
+  store = createStore(rootReducer, initialState);
 
-export default rootReducer;
+  return Promise.all([
+      // DO ASYNC THUNK ACTIONS HERE : store.dispatch(boostrapApp())
+      Promise.resolve({})
+    ]).then(() => {
+      return store;
+  });
+}
 ```
 
 * Run the server:
