@@ -55,7 +55,7 @@ import SSRCaching from "electrode-react-ssr-caching";
 * SSR caching will not work if the ordering is changed since caching module has to have a chance to patch react's code first.
 * If you are importing `electrode-react-ssr-caching`, `react` and `react-dom` in the same file, make sure
 you are using all `require` or all `import`. Found that SSR caching was NOT working if, `electrode-react-ssr-caching`
-is `require`d first and then `react` and `react-dom` is imported.
+is required first and then `react` and `react-dom` is imported.
 
 * Enable caching by adding the configuration code in `expressApp/tools/express/server.js`
 
@@ -263,7 +263,7 @@ class HomePage extends Component {
 export default HomePage; 
 ```
 
-* Remove the header from the `App.js` like such: 
+* Remove the header from the `expressApp/source/components/App.js` like such: 
 
 ```jsx
 import React, {Component, PropTypes} from 'react';
@@ -318,7 +318,7 @@ const store = configureStore({count: 100});
 NODE_ENV=production npm start
 ```
 
-* Navigate to the url and port number displayed in the terminal, both links for for Simple and Template Type should return a list of 100 items
+* Navigate to `http://localhost:3000/`, both links for Simple and Template Type should return a list of 100 items
 
 ### *** Important Notes ***
 * SSR caching of components only works in PRODUCTION mode, since the props(which are read only) are mutated for caching purposes and mutating of props is not allowed in development mode by react.
