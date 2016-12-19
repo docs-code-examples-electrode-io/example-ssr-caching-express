@@ -13,12 +13,12 @@ It supports 2 types of caching:
 
 ## Instructions
 
-### <a name="express-server"></a>Express Server
-* Let's use the [react-redux-universal-hot-example] repo to scaffold our app.
-* Create a hapi app using the following:
+## <a name="express-server"></a>Express Server
+* Let's use the [express-react-redux-starter] repo to scaffold our app.
+* Create a hapi app using the following commands:
 
 ```bash
-git clone https://github.com/erikras/react-redux-universal-hot-example.git expressApp
+git clone https://github.com/electrode-samples/express-react-redux-starter.git expressApp
 cd expressApp
 npm install
 ```
@@ -26,7 +26,7 @@ npm install
 * Ensure that you have a working app by running the following:
 
 ```bash
-npm run dev
+NODE_ENV=development npm start
 ```
 
 * From your browser, navigate to `http://localhost:3000` to see the default web page
@@ -35,10 +35,16 @@ npm run dev
 * Install the [electrode-react-ssr-caching] module with the following:
 
 ```bash
+npm install --save react@15.3.0
+npm install --save react-dom@15.3.0
+npm install --save react-router@3.0.0
 npm install --save electrode-react-ssr-caching
 ```
 
-* Import SSRCaching in `expressApp/src/server.js`
+* Note: The current version of `electrode-react-ssr-caching v0.1.5` requires `react v15.3.0`, `react-dom v15.3.0`, and 
+`react-router v3.0.0`
+
+* Import SSRCaching in `expressApp/tools/express/server.js`
 
 ```js
 import SSRCaching from "electrode-react-ssr-caching";
@@ -51,7 +57,7 @@ import SSRCaching from "electrode-react-ssr-caching";
 you are using all `require` or all `import`. Found that SSR caching was NOT working if, `electrode-react-ssr-caching`
 is `require`d first and then `react` and `react-dom` is imported.
 
-* Enable caching by adding the configuration code in `expressApp/src/server.js`
+* Enable caching by adding the configuration code in `expressApp/tools/express/server.js`
 
 ```js
 const cacheConfig = {
@@ -76,23 +82,46 @@ SSRCaching.setCachingConfig(cacheConfig);
 
 * For simple strategy, add the following:
 
-`expressApp/src/components/SSRCachingSimpleType.js`
+* `expressApp/source/components/SSRCaching/SSRCachingSimpleType.js`
 
-```js
-import React from "react";
+```jsx
+import React, { Component, PropTypes } from "react";
+
+class SSRCachingSimpleType extends Component {
+  render() {
+    return (
+      <div>
+        <p>{this.props.navEntry}</p>
+      </div>
+    );
+  }
+}
+
+SSRCachingSimpleType.propTypes = {
+  navEntry: PropTypes.string.isRequired
+};
+
+export default SSRCachingSimpleType;
+```
+
+* `expressApp/source/components/SSRCaching/SSRCachingSimpleTypeWrapper.js`
+
+```jsx
+import React, { Component, PropTypes } from "react";
 import {connect} from "react-redux";
+import SSRCachingSimpleType from "./SSRCachingSimpleType";
 
-class SSRCachingSimpleTypeWrapper extends React.Component {
+class SSRCachingSimpleTypeWrapper extends Component {
   render() {
     const count = this.props.count;
 
-    var elements = [];
+    let elements = [];
 
-	for (var i = 0; i < count; i++) {
+    for (let i = 0; i < count; i++) {
       elements.push(<SSRCachingSimpleType key={i} navEntry={"NavEntry" + i} />);
-	}
+    }
 
-	return (
+    return (
       <div>
         {elements}
       </div>
@@ -100,18 +129,12 @@ class SSRCachingSimpleTypeWrapper extends React.Component {
   }
 }
 
-class SSRCachingSimpleType extends React.Component {
-  render() {
-    return (
-      <div>
-	    <p>{this.props.navEntry}</p>
-	  </div>
-    );
-  }
-}
+SSRCachingSimpleTypeWrapper.propTypes = {
+  count: PropTypes.number.isRequired
+};
 
 const mapStateToProps = (state) => ({
-    count: state.count
+  count: state.count
 });
 
 export default connect(
@@ -121,30 +144,12 @@ export default connect(
 
 * For Template strategy, add the following:
 
-`expressApp/src/components/SSRCachingTemplateType.js`
+* `expressApp/source/components/SSRCaching/SSRCachingTemplateType.js`
 
-```js
-import React from "react";
-import { connect } from "react-redux";
+```jsx
+import React, { Component, PropTypes } from "react";
 
-class SSRCachingTemplateTypeWrapper extends React.Component {
-  render() {
-    const count = this.props.count;
-    var elements = [];
-
-    for(var i = 0; i < count; i++) {
-      elements.push(<SSRCachingTemplateType key={i} name={"name"+i} title={"title"+i} rating={"rating"+i}/>);
-    }
-
-    return (
-      <div>
-        { elements }
-      </div>
-    );
-  }
-}
-
-class SSRCachingTemplateType extends React.Component {
+class SSRCachingTemplateType extends Component {
   render() {
     return (
       <div>
@@ -154,9 +159,46 @@ class SSRCachingTemplateType extends React.Component {
   }
 }
 
+SSRCachingTemplateType.propTypes = {
+  name: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired,
+  rating: PropTypes.string.isRequired
+};
+
+export default SSRCachingTemplateType;
+```
+
+* `expressApp/source/components/SSRCaching/SSRCachingTemplateTypeWrapper.js`
+
+```jsx
+import React, { Component, PropTypes } from "react";
+import { connect } from "react-redux";
+import SSRCachingTemplateType from "./SSRCachingTemplateType";
+
+class SSRCachingTemplateTypeWrapper extends React.Component {
+  render() {
+    const count = this.props.count;
+    let elements = [];
+
+    for(let i = 0; i < count; i++) {
+      elements.push(<SSRCachingTemplateType key={i} name={"name"+i} title={"title"+i} rating={"rating"+i}/>);
+    }
+
+    return (
+      <div>
+        {elements}
+      </div>
+    );
+  }
+}
+
+SSRCachingTemplateTypeWrapper.propTypes = {
+  count: PropTypes.number.isRequired
+};
+
 const mapStateToProps = (state) => ({
   count: state.count
-})
+});
 
 export default connect(
   mapStateToProps
@@ -164,33 +206,32 @@ export default connect(
 ```
 
 * Add the routes to our new components.
-* Replace the contents of `expressApp/src/routes.js` with the following:
+* Replace the contents of `expressApp/source/routes.js` with the following:
 
 ```js
 import React from 'react';
-import { Router, Route } from 'react-router';
-import Home from './components/Home';
-import SSRCachingTemplateType from "./components/SSRCachingTemplateType";
-import SSRCachingSimpleType from "./components/SSRCachingSimpleType";
+import { Route, IndexRoute } from 'react-router';
+import App from './components/App';
+import HomePage from './components/home/HomePage';
+import SSRCachingSimpleTypeWrapper from "./components/SSRCaching/SSRCachingSimpleTypeWrapper";
+import SSRCachingTemplateTypeWrapper from "./components/SSRCaching/SSRCachingTemplateTypeWrapper";
 
-module.exports = (
-  <Router>
-    <Route>
-      <Route path="/" component={Home} />
-	  <Route path="/ssrcachingtemplatetype" component={SSRCachingTemplateType} />
-      <Route path="/ssrcachingsimpletype" component={SSRCachingSimpleType} />
-    </Route>
-  </Router>
+export default (
+  <Route path="/" component={App}>
+    <IndexRoute component={HomePage} />
+    <Route path="/ssrcachingsimpletype" component={SSRCachingSimpleTypeWrapper} />
+    <Route path="/ssrcachingtemplatetype" component={SSRCachingTemplateTypeWrapper} />
+  </Route>
 );
 ```
 
 * Wire up the home page with our new routes.
-* Add the following `expressApp/src/components/Home.js`:
+* Add the following `expressApp/src/components/home/HomePage.js`:
 
-```js
-import React from "react";
+```jsx
+import React, { Component } from "react";
 
-export default class Home extends React.Component {
+class HomePage extends Component {
   render() {
     return (
       <div>
@@ -202,47 +243,64 @@ export default class Home extends React.Component {
               SSR Caching - Simple
             </a>
             <p>Component Props become the cache key. This is useful for cases like Header and Footer where the number
-            of variations of props data is minimal which will make sure the cache size stays small.</p>
+              of variations of props data is minimal which will make sure the cache size stays small.</p>
           </li>
           <li className="ssr caching">
             <a href="/ssrcachingtemplatetype">
               SSR Caching- Template Type
             </a>
             <p>Components Props are first tokenized and then the generated template html is cached. The idea is akin to
-            generating logic-less handlebars template from your React components and then use string replace to process
-            the template with different props. This is useful for cases like displaying Product information in a
-            Carousel where you have millions of products in the repository.</p>
+              generating logic-less handlebars template from your React components and then use string replace to process
+              the template with different props. This is useful for cases like displaying Product information in a
+              Carousel where you have millions of products in the repository.</p>
           </li>
         </ul>
-	  </div>
+      </div>
     );
   }
 }
+
+export default HomePage; 
+```
+
+* Remove the header from the `App.js` like such: 
+
+```jsx
+import React, {Component, PropTypes} from 'react';
+
+class App extends Component {
+  render() {
+    return (
+      <div className="container-fluid">
+        {this.props.children}
+      </div>
+    );
+  }
+}
+
+App.propTypes = {
+  children: PropTypes.object.isRequired
+};
+
+export default App;
 ```
 
 ### Redux Configuration
-
-
-* From `expressApp/src/redux/create.js` replace the contents with the following:
+* Replace the contents of `expressApp/source/reducers/index.js` with the following:
 
 ```js
-function createReduxStore(req, match) {
-  // this refs to engine
+import { combineReducers } from 'redux';
+import { routerReducer } from 'react-router-redux';
 
-  let initialState = {count : 100};
-  let rootReducer = (s, a) => s;
-  store = createStore(rootReducer, initialState);
+const rootReducer = combineReducers({
+  routing: routerReducer,
+  count: (s=100, a) => s
+});
 
-  return Promise.all([
-      // DO ASYNC THUNK ACTIONS HERE : store.dispatch(boostrapApp())
-      Promise.resolve({})
-    ]).then(() => {
-      return store;
-  });
-}
+export default rootReducer;
 ```
 
-* From `expressApp/src/server.js` replace the line:
+* From `expressApp/tools/express/server.js` replace the line:
 
 ```
 const store = configureStore();
@@ -254,40 +312,19 @@ with:
 const store = configureStore({count: 100});
 ```
 
-* Replace the contents of `express/src/reducers/index.js` with the following:
-
-```js
-function createReduxStore(req, match) {
-  // this refs to engine
-
-  let initialState = {count : 100};
-  let rootReducer = (s, a) => s
-  store = createStore(rootReducer, initialState);
-
-  return Promise.all([
-      // DO ASYNC THUNK ACTIONS HERE : store.dispatch(boostrapApp())
-      Promise.resolve({})
-    ]).then(() => {
-      return store;
-  });
-}
-```
-
 * Run the server:
 
 ```bash
-npm run production
+NODE_ENV=production npm start
 ```
 
 * Navigate to the url and port number displayed in the terminal, both links for for Simple and Template Type should return a list of 100 items
 
 ### *** Important Notes ***
 * SSR caching of components only works in PRODUCTION mode, since the props(which are read only) are mutated for caching purposes and mutating of props is not allowed in development mode by react.
-
-
 * To read more, go to [electrode-react-ssr-caching]
 
 ---
 
 [electrode-react-ssr-caching]: https://github.com/electrode-io/electrode-react-ssr-caching
-[react-redux-universal-hot-example]: https://github.com/erikras/react-redux-universal-hot-example.git
+[express-react-redux-starter]: https://github.com/electrode-samples/express-react-redux-starter
